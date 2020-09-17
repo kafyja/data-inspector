@@ -3,12 +3,13 @@ from collections import defaultdict
 import difflib
 from tqdm import tqdm
 
-
 data_file = 'specificdata/rdiscoveryconceptresults.txt'
 
 line_format = re.compile(
     r"ID: (\d+) - label: (.+?) - alts: {'input': (\[.+?\]), 'weight': (\d+)}"
 )
+
+SPACINGS = {' ', '-', '–'}
 
 
 class Entry:
@@ -41,7 +42,10 @@ class AltForm:
         self.variants = {}
         self._spacings = None
 
-    def add(self, variant):
+    def add(self, variant: str):
+        variant = variant.lower()
+        if variant in self.variants:
+            return
         self._spacings = None
         spacings = set()
         diffs = list(difflib.ndiff(self.collapsed_form, variant))
@@ -63,12 +67,34 @@ class AltForm:
             self._update_spacings()
         return self._spacings
 
+    def _good_and_bad_spacings(self):
+        threshold = len(self.variants) / 2
+        good, bad = set(), set()
+        for spacing, count in self.get_spacings().items():
+            if count > threshold:
+                good.add(spacing)
+            else:
+                bad.add(spacing)
+        return good, bad
+
+    def ranked_variants(self):
+        good, bad = self._good_and_bad_spacings()
+        ranked_variants = sorted(
+            self.variants,
+            key=lambda v: (len(self.variants[v].intersection(good))
+                           - len(self.variants[v].intersection(bad)))
+            if not contains_multi_space(v) else -10,  # 10 is just a random penalty
+            reverse=True
+        )
+        return ranked_variants
+
     def __repr__(self):
-        return f'AltForm({self.collapsed_form}: {str(self.variants)})'
+        variants = str(self.ranked_variants())
+        return f'{self.collapsed_form}: {variants}'
 
 
 def reduce_form(alt_form: str):
-    return ''.join(c for c in alt_form.lower() if c.isalnum())
+    return ''.join(c for c in alt_form.lower() if c not in SPACINGS)
 
 
 def contains_multi_space(variant: str):
@@ -92,6 +118,3 @@ alt_forms = [alt_form for entry in tqdm(entries)
 
 alt_forms.sort(key=lambda af: len(af.get_spacings()) / len(af.collapsed_form),
                reverse=True)
-
-
-
