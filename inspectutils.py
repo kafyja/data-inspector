@@ -7,3 +7,10 @@ def compare_entries(*entries):
                        for entry in entries]
               for key in keys]
     print(tabulate(values))
+
+
+def get_discontinuous_concepts_from_index_file(data: dict):
+    concepts = data['concepts']
+    return [c for c in concepts
+            if any(len(loc['ranges']) > 1 for loc in c['locations'])]
+
