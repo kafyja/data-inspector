@@ -14,3 +14,15 @@ def get_discontinuous_concepts_from_index_file(data: dict):
     return [c for c in concepts
             if any(len(loc['ranges']) > 1 for loc in c['locations'])]
 
+
+def concept_has_feature(concept: dict, feature: str):
+    return any(feature in f.values() for f in concept['features'])
+
+
+def map_collapsed_keys_to_cons_keys(collapse_data):
+    return {v['ID']: k for k, v in collapse_data.items()}
+
+
+def map_cons_keys_to_collapsed_keys(collapse_data):
+    return {k: v['ID'] for k, v in collapse_data.items()}
+

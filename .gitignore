@@ -1,5 +1,5 @@
 .idea
 data
-specific/specificdata
-specific/output
+superfluous-spaces/specificdata
+superfluous-spaces/output
 .DS_Store
