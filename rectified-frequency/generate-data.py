@@ -35,9 +35,11 @@ ALL_FEATURES = {
 }
 
 RELEVANT_FEATURES = {
+    'belowAllowedMinRectifiedFrequencyInDocAndCorpus',
     'discontinuousFrequencyInDoc', 'frequencyInCorpus', 'jsonExport',
-    'minRectifiedFrequencyInCorpus', 'minRectifiedFrequencyInDoc',
-    'mostCommonDisplayInCorpus', 'normalizedMinRectifiedFrequencyInCorpus',
+    'fullText', 'minRectifiedFrequencyInCorpus', 'minRectifiedFrequencyInDoc',
+    'ngramFrequencyInCorpus', 'ngramFrequencyInDoc',
+    'normalizedMinRectifiedFrequencyInCorpus',
     'normalizedMinRectifiedFrequencyInDoc', 'normalizedNgramFrequencyInCorpus',
     'normalizedNgramFrequencyInDoc', 'normalizedPmi',
     'normalizedRectifiedFrequencyInCorpus', 'normalizedRectifiedFrequencyInDoc',
@@ -49,6 +51,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('output_name', type=str)
 parser.add_argument('json_glob_pattern', type=str)
 args = parser.parse_args()
+# args.output_name = 'DEBUG'
+# args.json_glob_pattern = "/Users/kasper.jacobsen/IdeaProjects/" \
+#                          "unsilo-content-processing/output/content-processing" \
+#                          "/processed-main/hindawi/datamining/**/*.json.gz"
+
 
 file_paths = glob.glob(args.json_glob_pattern, recursive=True)
 
@@ -61,6 +68,7 @@ for fp in tqdm(file_paths, 'Getting concept features'):
     for concept in concepts:
         features = {f['label']: f['value'] for f in concept['features']
                     if f['label'] in RELEVANT_FEATURES}
+        features['display'] = concept['display']
         features['document'] = data['_id']
         features['key'] = concept['key'] + '-' + features['document']
         output.append(features)

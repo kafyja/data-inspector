@@ -108,11 +108,12 @@ def determine_key(info: dict):
             return key
 
 
-path = get_file_path_choice()
-if type(path) == list:
-    data = [load_file(p) for p in path]
-else:
-    metadata, data = load_file(path)
+if __name__ == '__main__':
+    path = get_file_path_choice()
+    if type(path) == list:
+        data = [load_file(p) for p in path]
+    else:
+        metadata, data = load_file(path)
 
 
 
